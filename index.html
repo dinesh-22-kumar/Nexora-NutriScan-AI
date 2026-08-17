@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nexora NutriScan AI | Everyday Consumer Health Intelligence</title>
+    
+    <!-- Tesseract OCR & Tailwind CSS -->
+    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Ambient Dynamic Background */
+        body {
+            background-color: #0b1319;
+            color: #f1f5f9;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating Aurora Gradient Bubbles */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.45;
+            animation: floatGlow 16s ease-in-out infinite alternate;
+        }
+        .blob-1 {
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, #059669 0%, #10b981 40%, transparent 70%);
+            top: -120px;
+            left: 5%;
+        }
+        .blob-2 {
+            width: 520px;
+            height: 520px;
+            background: radial-gradient(circle, #0284c7 0%, #38bdf8 40%, transparent 70%);
+            bottom: -120px;
+            right: 5%;
+            animation-duration: 20s;
+            animation-delay: -6s;
+        }
+        .blob-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+            top: 40%;
+            left: 35%;
+            animation-duration: 24s;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(40px, 60px) scale(1.1) rotate(60deg); }
+            100% { transform: translate(-30px, -40px) scale(0.95) rotate(-40deg); }
+        }
+
+        /* Glassmorphism App Cards */
+        .app-card {
+            background: rgba(18, 28, 38, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            transition: all 0.25s ease;
+        }
+
+        .action-card {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .action-card:active {
+            transform: scale(0.96);
+        }
+
+        /* Laser Scan Beam Animation */
+        .scan-laser-beam {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #10b981, #34d399, transparent);
+            box-shadow: 0 0 18px #10b981, 0 0 10px #34d399;
+            animation: scanLaser 1.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes scanLaser {
+            0% { top: 4%; }
+            100% { top: 94%; }
+        }
+
+        /* Circular SVG Gauge Transition */
+        .gauge-circle-progress {
+            transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Card Slide Pop */
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-card-pop {
+            animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Shimmer Loading Skeleton */
+        .shimmer {
+            background: linear-gradient(90deg, rgba(30, 41, 59, 0.6) 25%, rgba(51, 65, 85, 0.9) 50%, rgba(30, 41, 59, 0.6) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+
+<body class="py-4 sm:py-8 px-3 sm:px-6 flex flex-col items-center">
+
+    <!-- Floating Background Lights -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+    <div class="ambient-blob blob-3"></div>
+
+    <div class="max-w-4xl w-full mx-auto space-y-5 relative z-10">
+
+        <!-- Top App Navigation & Brand Bar -->
+        <header class="app-card rounded-2xl p-4 flex items-center justify-between border-slate-700/60">
+            <div class="flex items-center gap-3">
+                <img src="nexora-logo.png" alt="Nexora Logo"
+                    class="h-9 sm:h-11 w-auto object-contain cursor-pointer transition-transform hover:scale-105 active:scale-95 drop-shadow-[0_0_12px_rgba(16,185,129,0.3)]"
+                    onerror="this.src='https://via.placeholder.com/150x45/0f172a/38bdf8?text=NEXORA+AI'">
+                <div class="border-l border-slate-700 pl-3">
+                    <span class="text-[11px] font-extrabold tracking-wider text-emerald-400 uppercase flex items-center gap-1.5">
+                        NutriScan Pro
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    </span>
+                    <p class="text-xs text-slate-400 font-medium">Consumer Health Intelligence</p>
+                </div>
+            </div>
+            <span class="text-xs px-3.5 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold rounded-full hidden sm:inline-flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                AI Active
+            </span>
+        </header>
+
+        <!-- Interactive Scan Center Card -->
+        <div class="app-card rounded-3xl p-5 sm:p-8 space-y-6">
+            
+            <!-- Headline Section -->
+            <div>
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs font-bold text-emerald-300 mb-2">
+                    <span>🛡️ Automated Label Intelligence</span>
+                </div>
+                <h1 class="text-xl sm:text-3xl font-extrabold text-white tracking-tight">Packaged Food Ingredient Scanner</h1>
+                <p class="text-xs sm:text-sm text-slate-300/80 mt-1">பாக்கெட் உணவின் பின்புறக் குறிப்புகளைப் படம் பிடித்தோ அல்லது பதிவேற்றியோ மறைமுக சர்க்கரை, பாமாயில் மற்றும் கெமிக்கல்களை உடனே கண்டறியுங்கள்.</p>
+            </div>
+
+            <!-- 3 Quick Action Trigger Hub (Live Camera, Upload, Sample) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                
+                <!-- Action 1: Live Camera Modal -->
+                <button onclick="openCamera()" class="action-card p-4 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white shadow-lg shadow-emerald-600/30 text-left flex flex-col justify-between h-28 cursor-pointer border border-emerald-400/30 hover:border-emerald-300">
+                    <span class="text-2xl">📸</span>
+                    <div>
+                        <p class="font-bold text-sm leading-tight">Live Camera</p>
+                        <span class="text-[10px] text-emerald-100/80">Open Viewfinder</span>
+                    </div>
+                </button>
+
+                <!-- Action 2: Gallery Image Upload -->
+                <label class="action-card p-4 rounded-2xl bg-slate-900/60 border border-slate-700 hover:border-emerald-400/50 hover:bg-slate-800/80 text-white text-left flex flex-col justify-between h-28 cursor-pointer shadow-sm">
+                    <span class="text-2xl">📁</span>
+                    <div>
+                        <p class="font-bold text-sm text-slate-100 leading-tight">Upload Image</p>
+                        <span class="text-[10px] text-slate-400">Pick from Gallery</span>
+                    </div>
+                    <input type="file" accept="image/*" class="hidden" onchange="handleImageFile(event)">
+                </label>
+
+                <!-- Action 3: Quick Presets (Col-span 2 on mobile) -->
+                <div class="col-span-2 sm:col-span-1 p-4 rounded-2xl bg-slate-900/40 border border-slate-700/60 flex flex-col justify-between h-28">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Quick Demos</span>
+                    <div class="flex gap-1.5 overflow-x-auto pb-1">
+                        <button onclick="setSample('biscuit')" class="px-2.5 py-1 bg-slate-800 hover:bg-emerald-600/30 hover:text-emerald-300 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 whitespace-nowrap transition">Biscuit</button>
+                        <button onclick="setSample('chips')" class="px-2.5 py-1 bg-slate-800 hover:bg-emerald-600/30 hover:text-emerald-300 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 whitespace-nowrap transition">Chips</button>
+                        <button onclick="setSample('noodles')" class="px-2.5 py-1 bg-slate-800 hover:bg-emerald-600/30 hover:text-emerald-300 border border-slate-700 rounded-lg text-xs font-semibold text-slate-200 whitespace-nowrap transition">Noodles</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Image Preview Box (Stops laser when completed) -->
+            <div id="imagePreviewContainer" class="relative rounded-2xl overflow-hidden border border-emerald-500/40 bg-black/90 max-h-56 hidden flex items-center justify-center shadow-xl">
+                <img id="imagePreview" src="" alt="Captured Ingredients" class="object-contain max-h-56 w-full opacity-85">
+                
+                <!-- Laser Beam Line -->
+                <div id="laserBeam" class="scan-laser-beam"></div>
+                
+                <!-- Status Badge -->
+                <div id="scanStatusBadge" class="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[11px] font-bold text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="scanStatusText">Extracting Text with Optical AI...</span>
+                </div>
+            </div>
+
+            <!-- Manual Text Input Area -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <label for="ingredientInput">Detected / Input Ingredients</label>
+                    <span class="text-slate-400 font-normal lowercase">English & Label Codes</span>
+                </div>
+                <textarea id="ingredientInput" rows="3"
+                    class="w-full p-3.5 bg-slate-950/70 border border-slate-700 rounded-2xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-xs sm:text-sm font-code transition shadow-inner leading-relaxed"
+                    placeholder="Refined Wheat Flour, Palm Oil, Sugar, Maltodextrin, Invert Sugar, INS 621, INS 150d, Soy Lecithin..."></textarea>
+            </div>
+
+            <!-- Main Analyze Button -->
+            <button onclick="scanFood()"
+                class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.99] text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 cursor-pointer transition">
+                <span>Scan Health Safety & Additives</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </button>
+
+            <!-- Skeleton Loading State -->
+            <div id="skeletonLoading" class="space-y-4 hidden">
+                <div class="p-6 rounded-2xl border border-slate-700/60 bg-slate-900/50 space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 rounded-full shimmer"></div>
+                        <div class="space-y-2 flex-1">
+                            <div class="h-4 w-1/3 rounded shimmer"></div>
+                            <div class="h-6 w-2/3 rounded shimmer"></div>
+                        </div>
+                    </div>
+                    <div class="h-12 w-full rounded-xl shimmer"></div>
+                </div>
+            </div>
+
+            <!-- Dynamic Result Card -->
+            <div id="resultCard" class="border border-slate-700 rounded-3xl p-5 sm:p-7 bg-slate-900/70 space-y-6 hidden animate-card-pop">
+
+                <!-- Score & Animated Circular Gauge Section -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-700/60">
+                    <div class="flex items-center gap-5">
+                        
+                        <!-- Circular Gauge Meter -->
+                        <div class="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="42" stroke="rgba(51, 65, 85, 0.7)" stroke-width="9" fill="transparent"/>
+                                <circle id="gaugeProgress" class="gauge-circle-progress" cx="50" cy="50" r="42" stroke="#10b981" stroke-width="9" stroke-linecap="round" fill="transparent" stroke-dasharray="264" stroke-dashoffset="264"/>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="gaugeGradeText" class="text-2xl font-black font-code text-white leading-none">A</span>
+                                <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5">Grade</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider">Nexora Health Index</span>
+                            <h3 id="verdictBadge" class="text-base sm:text-lg font-black text-white"></h3>
+                            <p id="verdictText" class="text-xs text-slate-300 mt-1 max-w-md leading-relaxed"></p>
+                        </div>
+                    </div>
+
+                    <!-- Safety Score Badge -->
+                    <div class="w-full sm:w-auto text-center sm:text-right bg-slate-950/80 p-3.5 rounded-2xl border border-slate-700/80 shadow-inner min-w-[130px]">
+                        <span class="text-[10px] text-slate-400 uppercase font-bold block">Safety Score</span>
+                        <div id="scoreText" class="text-2xl sm:text-3xl font-black font-code text-emerald-400"></div>
+                    </div>
+                </div>
+
+                <!-- Detected Flags Breakdown -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-300 uppercase tracking-wider">Detected Warning Additives</span>
+                        <span id="flagsCount" class="text-xs px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-700 text-slate-300 font-code font-bold"></span>
+                    </div>
+
+                    <div id="additiveList" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Allergens Alert -->
+                <div id="allergenBox" class="p-4 bg-amber-950/30 border border-amber-500/40 rounded-2xl hidden">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wide block mb-1">⚠️ Potential Allergen Warnings</span>
+                    <p id="allergenList" class="text-xs text-amber-200 font-medium leading-relaxed"></p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Recent Scans History Slider (Local Storage) -->
+        <div class="app-card rounded-2xl p-4 sm:p-5 space-y-3">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🕒 Recent Scans Stream</span>
+                </span>
+                <button onclick="clearScanHistory()" class="text-[11px] text-slate-400 hover:text-rose-400 font-semibold transition">Clear History</button>
+            </div>
+            <div id="historyStream" class="flex gap-2.5 overflow-x-auto pb-1 text-xs">
+                <p class="text-slate-500 py-3 text-xs">No recent food scans recorded.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center pt-2 text-xs text-slate-500 font-medium">
+            Crafted with Precision by <span class="text-slate-300 font-bold">Nexora AI Studio</span> • Consumer Transparency Suite
+        </footer>
+
+    </div>
+
+    <!-- Live Camera Viewfinder Modal Overlay -->
+    <div id="cameraModal" class="hidden fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-card-pop">
+        <div class="bg-slate-900 rounded-3xl p-5 w-full max-w-md shadow-2xl space-y-4 border border-slate-700">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="font-bold text-white text-sm flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Align Ingredients in Frame
+                </h3>
+                <button onclick="closeCamera()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center font-bold text-sm">✕</button>
+            </div>
+            
+            <div class="relative w-full h-72 bg-black rounded-2xl overflow-hidden border border-slate-800">
+                <video id="video" class="w-full h-full object-cover" autoplay playsinline muted></video>
+                <div class="absolute inset-x-8 inset-y-10 border-2 border-emerald-400/80 rounded-xl pointer-events-none border-dashed animate-pulse"></div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="capturePhoto()" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-sm shadow-md active:scale-95 transition">
+                    📸 Capture & Analyze
+                </button>
+                <button onclick="closeCamera()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-5 py-3.5 rounded-xl text-sm transition">
+                    Cancel
+                </button>
+            </div>
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const samples = {
+            biscuit: "Refined Wheat Flour, Palm Oil, Sugar, Invert Sugar Syrup, Maltodextrin, INS 322, INS 500(ii), Artificial Vanilla Flavor",
+            chips: "Potato, Palmolein Oil, Salt, Sugar, Maltodextrin, Spices & Condiments, INS 621, INS 627, INS 631, Acidity Regulator (INS 330)",
+            noodles: "Wheat Flour, Palm Oil, Salt, Wheat Gluten, Hydrolyzed Groundnut Protein, Sugar, Monosodium Glutamate (INS 621), Caramel Color (INS 150d)"
+        };
+
+        function setSample(type) {
+            document.getElementById("ingredientInput").value = samples[type];
+            document.getElementById("imagePreviewContainer").classList.add("hidden");
+            scanFood();
+        }
+
+        /* History Management */
+        let scanHistory = JSON.parse(localStorage.getItem("nexoraNutriHistory") || "[]");
+        renderHistory();
+
+        function renderHistory() {
+            const container = document.getElementById("historyStream");
+            if (!scanHistory.length) {
+                container.innerHTML = '<p class="text-slate-500 py-3 text-xs">No recent food scans recorded.</p>';
+                return;
+            }
+            container.innerHTML = scanHistory.map((item, idx) => `
+                <div onclick="restoreHistory(${idx})" class="flex-shrink-0 p-3 bg-slate-900/60 hover:bg-emerald-950/30 border border-slate-700/80 hover:border-emerald-500/40 rounded-xl cursor-pointer transition min-w-[140px]">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="font-bold text-xs ${item.grade === 'A' ? 'text-emerald-400' : item.grade === 'B' ? 'text-blue-400' : item.grade === 'C' ? 'text-amber-400' : 'text-rose-400'}">Grade ${item.grade}</span>
+                        <span class="font-code text-[10px] text-slate-400 font-bold">${item.health_score > 0 ? item.health_score : '--'}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300/80 truncate max-w-[120px] font-code">${item.query}</p>
+                </div>
+            `).join("");
+        }
+
+        function restoreHistory(idx) {
+            const item = scanHistory[idx];
+            document.getElementById("ingredientInput").value = item.query;
+            scanFood();
+        }
+
+        function clearScanHistory() {
+            scanHistory = [];
+            localStorage.removeItem("nexoraNutriHistory");
+            renderHistory();
+        }
+
+        /* Scan Food Function */
+        async function scanFood() {
+            const text = document.getElementById("ingredientInput").value.trim();
+            if (!text) return;
+
+            document.getElementById("skeletonLoading").classList.remove("hidden");
+            document.getElementById("resultCard").classList.add("hidden");
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/analyze-food", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ingredients_text: text })
+                });
+                const data = await res.json();
+                document.getElementById("skeletonLoading").classList.add("hidden");
+
+                if (res.status !== 200) {
+                    alert(data.detail || "Scan error");
+                    return;
+                }
+
+                // Update Gauge & Colors
+                const gaugeProgress = document.getElementById("gaugeProgress");
+                const gaugeGradeText = document.getElementById("gaugeGradeText");
+                const scoreText = document.getElementById("scoreText");
+                
+                gaugeGradeText.innerText = data.grade;
+
+                // Circumference = 2 * PI * 42 ~= 264
+                const circumference = 264;
+                const scorePercent = data.health_score > 0 ? data.health_score : 0;
+                const offset = circumference - (scorePercent / 100) * circumference;
+                gaugeProgress.style.strokeDashoffset = offset;
+
+                if (data.grade === 'A') {
+                    gaugeProgress.setAttribute("stroke", "#10b981");
+                    gaugeGradeText.className = "text-2xl font-black font-code text-emerald-400 leading-none";
+                    scoreText.className = "text-2xl sm:text-3xl font-black font-code text-emerald-400";
+                } else if (data.grade === 'B') {
+                    gaugeProgress.setAttribute("stroke", "#38bdf8");
+                    gaugeGradeText.className = "text-2xl font-black font-code text-sky-400 leading-none";
+                    scoreText.className = "text-2xl sm:text-3xl font-black font-code text-sky-400";
+                } else if (data.grade === 'C') {
+                    gaugeProgress.setAttribute("stroke", "#f59e0b");
+                    gaugeGradeText.className = "text-2xl font-black font-code text-amber-400 leading-none";
+                    scoreText.className = "text-2xl sm:text-3xl font-black font-code text-amber-400";
+                } else if (data.grade === 'D') {
+                    gaugeProgress.setAttribute("stroke", "#f43f5e");
+                    gaugeGradeText.className = "text-2xl font-black font-code text-rose-400 leading-none";
+                    scoreText.className = "text-2xl sm:text-3xl font-black font-code text-rose-400";
+                } else {
+                    gaugeProgress.setAttribute("stroke", "#64748b");
+                    gaugeGradeText.className = "text-2xl font-black font-code text-slate-400 leading-none";
+                    scoreText.className = "text-2xl sm:text-3xl font-black font-code text-slate-400";
+                }
+
+                document.getElementById("verdictBadge").innerText = data.badge;
+                document.getElementById("verdictText").innerText = data.verdict;
+                document.getElementById("scoreText").innerText = data.health_score > 0 ? `${data.health_score}/100` : "N/A";
+                document.getElementById("flagsCount").innerText = `${data.flags_count} Additives Found`;
+
+                // Additives List Rendering
+                const additiveList = document.getElementById("additiveList");
+                if (data.detected_items.length === 0) {
+                    if (data.grade === 'N/A') {
+                        additiveList.innerHTML = '<div class="p-4 bg-slate-950/80 border border-slate-700 rounded-2xl text-xs font-semibold text-slate-400">உணவு மூலப்பொருட்கள் எதுவும் கண்டறியப்படவில்லை.</div>';
+                    } else {
+                        additiveList.innerHTML = '<div class="p-4 bg-emerald-950/40 border border-emerald-500/30 rounded-2xl text-xs font-semibold text-emerald-300 flex items-center gap-2"><span>🌿</span> குறிப்பிட்ட ஆபத்தான ரசாயனங்கள் எதுவும் கண்டறியப்படவில்லை. (Clean Label)</div>';
+                    }
+                } else {
+                    additiveList.innerHTML = data.detected_items.map(item => `
+                        <div class="p-3.5 bg-slate-950/80 border border-slate-700/80 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+                          <div>
+                            <div class="flex items-center gap-2">
+                              <span class="font-bold text-sm text-slate-100">${item.name}</span>
+                              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700">${item.category}</span>
+                            </div>
+                            <p class="text-xs text-slate-400 mt-1">${item.tamil_explanation}</p>
+                          </div>
+                          <span class="text-[11px] font-bold px-3 py-1 rounded-xl self-start sm:self-center font-code ${item.risk === 'Severe' || item.risk === 'High' ? 'bg-rose-950/80 text-rose-300 border border-rose-500/40' : 'bg-amber-950/80 text-amber-300 border border-amber-500/40'}">${item.risk} Risk</span>
+                        </div>
+                    `).join("");
+                }
+
+                // Allergens Box
+                const allergenBox = document.getElementById("allergenBox");
+                if (data.allergens.length > 0) {
+                    allergenBox.classList.remove("hidden");
+                    document.getElementById("allergenList").innerText = `கண்டறியப்பட்ட ஒவ்வாமை காரணிகள்: ${data.allergens.join(", ")}`;
+                } else {
+                    allergenBox.classList.add("hidden");
+                }
+
+                document.getElementById("resultCard").classList.remove("hidden");
+
+                // Save to local history
+                scanHistory.unshift({
+                    query: text.substring(0, 30) + '...',
+                    grade: data.grade,
+                    health_score: data.health_score
+                });
+                if (scanHistory.length > 6) scanHistory.pop();
+                localStorage.setItem("nexoraNutriHistory", JSON.stringify(scanHistory));
+                renderHistory();
+
+            } catch (err) {
+                document.getElementById("skeletonLoading").classList.add("hidden");
+                alert("Server connection failed. Ensure backend is running.");
+            }
+        }
+
+        /* 📸 Live Camera Module */
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const modal = document.getElementById('cameraModal');
+
+        async function openCamera() {
+            modal.classList.remove('hidden');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } }
+                });
+                video.srcObject = stream;
+            } catch (err) {
+                alert("Camera permission denied or camera not available!");
+                closeCamera();
+            }
+        }
+
+        function closeCamera() {
+            modal.classList.add('hidden');
+            const stream = video.srcObject;
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+        }
+
+        function capturePhoto() {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth || 1280;
+            canvas.height = video.videoHeight || 720;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imgData = canvas.toDataURL('image/png');
+            closeCamera();
+            
+            // Show Laser Preview & Reset status
+            const previewContainer = document.getElementById("imagePreviewContainer");
+            const preview = document.getElementById("imagePreview");
+            const laser = document.getElementById("laserBeam");
+            const statusText = document.getElementById("scanStatusText");
+            
+            preview.src = imgData;
+            laser.classList.remove("hidden");
+            statusText.innerText = "Extracting Text with Optical AI...";
+            previewContainer.classList.remove("hidden");
+
+            processOCR(imgData);
+        }
+
+        /* 📁 File Upload Handler */
+        function handleImageFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const previewContainer = document.getElementById("imagePreviewContainer");
+                const preview = document.getElementById("imagePreview");
+                const laser = document.getElementById("laserBeam");
+                const statusText = document.getElementById("scanStatusText");
+                
+                preview.src = e.target.result;
+                laser.classList.remove("hidden");
+                statusText.innerText = "Extracting Text with Optical AI...";
+                previewContainer.classList.remove("hidden");
+
+                processOCR(e.target.result);
+            };
+            reader.readAsDataURL(file);
+            event.target.value = '';
+        }
+
+        /* OCR Processing Engine */
+        async function processOCR(imageData) {
+            const inputField = document.getElementById('ingredientInput');
+            const laser = document.getElementById("laserBeam");
+            const statusBadge = document.getElementById("scanStatusBadge");
+            const statusText = document.getElementById("scanStatusText");
+            document.getElementById("resultCard").classList.add("hidden");
+
+            try {
+                const result = await Tesseract.recognize(imageData, 'eng');
+                const extractedText = result.data.text.trim();
+
+                // 🛑 1. STOP THE LASER BEAM
+                laser.classList.add("hidden");
+
+                // ✅ 2. SHOW SCAN COMPLETED
+                statusText.innerText = "✅ Scan Completed & Verified";
+                statusBadge.className = "absolute bottom-3 left-3 bg-emerald-950/90 backdrop-blur-md px-3.5 py-1.5 rounded-full text-[11px] font-bold text-emerald-300 border border-emerald-500/60 flex items-center gap-1.5 shadow-lg";
+
+                if (extractedText && extractedText.length > 3) {
+                    inputField.value = extractedText;
+                    scanFood(); // Run AI analysis
+                } else {
+                    alert("No clear text detected. Please capture a clearer picture.");
+                }
+            } catch (err) {
+                laser.classList.add("hidden");
+                alert("OCR processing failed. Please type ingredients manually.");
+            }
+        }
+    </script>
+</body>
+
+</html>
